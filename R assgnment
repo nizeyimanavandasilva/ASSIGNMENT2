@@ -1,0 +1,148 @@
+
+R version 4.2.1 (2022-06-23 ucrt) -- "Funny-Looking Kid"
+Copyright (C) 2022 The R Foundation for Statistical Computing
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> makeCacheMatrix <- function(x = matrix()) {
++   
++   # Initialize the inverse matrix cache
++   inv <- NULL
++   
++   # Setter function to set the matrix
++   set <- function(y) {
++     x <<- y
++     inv <<- NULL  # Reset the cache when the matrix changes
++   }
++   
++   # Getter function to retrieve the matrix
++   get <- function() {
++     x
++   }
++   
++   # Getter function to retrieve the cached inverse
++   getInverse <- function() {
++     inv
++   }
++   
++   # Setter function to set the cached inverse
++   setInverse <- function(inverse) {
++     inv <<- inverse
++   }
++   
++   # Return a list containing the functions
++   list(set = set, get = get,
++        getInverse = getInverse, setInverse = setInverse)
++ }
+> 
+> # Function to compute the inverse of the special "matrix" returned by makeCacheMatrix
+> cacheSolve <- function(x, ...) {
++   
++   # Retrieve the cached inverse if it exists
++   inv <- x$getInverse()
++   
++   # If the inverse is not cached, compute it and cache it
++   if (!is.null(inv)) {
++     message("getting cached data")
++     return(inv)
++   }
++   
++   # If the inverse is not cached, compute it and cache it
++   mat <- x$get()
++   inv <- solve(mat, ...)
++   
++   # Cache the computed inverse
++   x$setInverse(inv)
++   
++   # Return the computed inverse
++   inv
++ }
+> You can use these functions as follows:
+Error: unexpected symbol in "You can"
+> 
+> R
+Error: object 'R' not found
+> Copy code
+Error: unexpected symbol in "Copy code"
+> # Create a special matrix object
+> mat <- makeCacheMatrix(matrix(c(1, 2, 3, 4), 2, 2))
+> 
+> # Compute the inverse using cacheSolve
+> cacheSolve(mat)
+     [,1] [,2]
+[1,]   -2  1.5
+[2,]    1 -0.5
+> # Function to create a special matrix object that caches its inverse
+> makeCacheMatrix <- function(x = matrix()) {
++   # Initialize the inverse to NULL
++   inverse <- NULL
++   
++   # Setter function to set the matrix
++   set <- function(y) {
++     x <<- y
++     # When the matrix is set, invalidate the cached inverse
++     inverse <<- NULL
++   }
++   
++   # Getter function to get the matrix
++   get <- function() {
++     x
++   }
++   
++   # Function to compute the inverse
++   cacheSolve <- function(...) {
++     # Check if the inverse is already cached
++     if (!is.null(inverse)) {
++       message("Getting cached inverse")
++       return(inverse)
++     }
++     
++     # If not, calculate the inverse
++     inverse <- solve(x, ...)
++     # Cache the inverse
++     x <<- inverse
++     inverse
++   }
++   
++   # Return a list of functions
++   list(set = set, get = get, cacheSolve = cacheSolve)
++ }
+> 
+> # Example usage:
+> # Create a matrix
+> m <- makeCacheMatrix(matrix(1:4, 2, 2))
+> 
+> # Get the matrix
+> m$get()
+     [,1] [,2]
+[1,]    1    3
+[2,]    2    4
+> # Set the matrix
+> m$set(matrix(c(4, 3, 2, 1), 2, 2))
+> 
+> # Get the matrix again
+> m$get()
+     [,1] [,2]
+[1,]    4    2
+[2,]    3    1
+> 
+> # Compute the inverse (it will cache it)
+> m$cacheSolve()
+     [,1] [,2]
+[1,] -0.5    1
+[2,]  1.5   -2
+> 
+> # Get the cached inverse
